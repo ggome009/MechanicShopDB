@@ -304,43 +304,101 @@ public class MechanicShop{
 		return input;
 	}//end readChoice
 	
+
 	public static void AddCustomer(MechanicShop esql){//1
+		String query = "INSERT INTO Customer(fname, lname, phone, address) VALUES (";
+
+		System.out.print("Please enter first name: ");
+		String fname = in.readLine();
 		
+
+		System.out.print("Please enter last name: ");
+		String lname = in.readLine();
+		
+		System.out.print("Please enter phone number: ");
+		String ph = in.readLine();
+
+		System.out.print("Please enter address: ");
+		String ad = in.readLine();
+
+		query = query + fname + ", " + lname + ", " + ph + ", " + ad + ")";
+
+		esql.executeUpdate(query);
 	}
 	
 	public static void AddMechanic(MechanicShop esql){//2
+		String query = "Mechanic(fname, lname, experience) VALUES (";
+
+		System.out.print("Please enter first name: ");
+		String fname = in.readLine();
+
+		System.out.print("Please enter last name: ");
+		String lname = in.readLine();
 		
+		System.out.print("Please enter years of experience: ");
+		String exp = in.readLine();
+
+		query = query + fname + ", " + lname + ", " + exp + ")";
+
+		esql.executeUpdate(query);
 	}
 	
 	public static void AddCar(MechanicShop esql){//3
-		
+		String query = "INSERT INTO Car(vin, make, model, year) VALUES (";
+
+		query = query + carVin + "," + carMake + "," + carModel + "," + carYear + ")";
 	}
 	
+	/*This function will allow you to add a service request for a customer into the database.
+	Given a last name, the function should search the database of existing customers. If many
+	customers match, a menu option should appear listing all customers with the given last
+	name asking the user to choose which customer has initiated the service request.
+	Otherwise, the client application should provide the option of adding a new customer. If
+	an existing customer is chosen, the client application should list all cars associated with
+	that client providing the option to initiate the service request for one of the listed cars,
+	otherwise a new car should be added along with the service request information for it.*/
 	public static void InsertServiceRequest(MechanicShop esql){//4
 		
 	}
 	
+	/*This function will allow you to complete an existing service request. Given a service
+	request number and an employee id, the client application should verify the information
+	provided and attempt to create a closing request record. You should make sure to check
+	for the validity of the provided inputs (i.e. does the mechanic exist, does the request exist,
+	valid closing date after request date, etc.)*/
 	public static void CloseServiceRequest(MechanicShop esql) throws Exception{//5
 		
 	}
 	
+	/*.List the customers that have paid less than 100 dollars for repairs based on their
+	previous service requests.*//
 	public static void ListCustomersWithBillLessThan100(MechanicShop esql){//6
 		
 	}
 	
+	/*Find how many cars each customer has counting from the ownership relation and
+	discover who has more than 20 cars.*/
 	public static void ListCustomersWithMoreThan20Cars(MechanicShop esql){//7
 		
 	}
 	
+	/*Get the odometer from the service_requests and find all cars before 1995 having less
+	than 50000 miles in the odometer*/
 	public static void ListCarsBefore1995With50000Milles(MechanicShop esql){//8
 		
 	}
 	
+	/*Find for all cars in the database the number of service requests. Return the make,
+	model and number of service requests for the cars having the k highest number of
+	service requests. The k value should be positive and larger than 0. The user should
+	provide this value. Focus on the open service requests.*/
 	public static void ListKCarsWithTheMostServices(MechanicShop esql){//9
 		//
 		
 	}
 	
+	/*For all service requests find the aggregate cost per customer and order customers
+	according to that cost. List their first, last name and total bill.*/
 	public static void ListCustomersInDescendingOrderOfTheirTotalBill(MechanicShop esql){//9
 		//
 		
