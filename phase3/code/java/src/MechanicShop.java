@@ -346,19 +346,78 @@ public class MechanicShop{
 	public static void AddCar(MechanicShop esql){//3
 		String query = "INSERT INTO Car(vin, make, model, year) VALUES (";
 
-		query = query + carVin + "," + carMake + "," + carModel + "," + carYear + ")";
+		System.out.print("Please enter VIN: ");
+		String vin = in.readLine();
+		
+		System.out.print("Please enter make of car: ");
+		String make = in.readLine();
+		
+		System.out.print("Please enter model of car: ");
+		String model = in.readLine();
+		
+		System.out.print("Please enter car year: ");
+		String carYear = in.readLine();
+		
+		query = query + vin + "," + make + "," + model + "," + carYear + ")";
+		esql.executeUpdate(query);
 	}
 	
 	/*This function will allow you to add a service request for a customer into the database.
-	Given a last name, the function should search the database of existing customers. If many
-	customers match, a menu option should appear listing all customers with the given last
+	Given a last name, the function should search the database of existing customers. 
+	* If many customers match, a menu option should appear listing all customers with the given last
 	name asking the user to choose which customer has initiated the service request.
-	Otherwise, the client application should provide the option of adding a new customer. If
-	an existing customer is chosen, the client application should list all cars associated with
+	Otherwise, the client application should provide the option of adding a new customer. 
+	* If an existing customer is chosen, the client application should list all cars associated with
 	that client providing the option to initiate the service request for one of the listed cars,
 	otherwise a new car should be added along with the service request information for it.*/
 	public static void InsertServiceRequest(MechanicShop esql){//4
 		
+		//search database of existing customers given lname
+		String query = "SELECT lname, id FROM Customer WHERE lname = '";
+		System.out.print("Please enter customer last name ");
+		String last = in.readLine();
+		query = query + last + "'";
+		int numResults = executeQuery(String query);
+		int customerID = 0;
+		if(numResults == 0) {
+			System.out.print("Customer not found. Would you like to add a customer? (Y/N)");
+			char choice = in.readLine();
+			
+			if(choice != 'y' || choice != 'n' || choice != 'Y' || choice != 'N') {
+					do {
+						System.out.print("Error: Unrecognized input. Enter (Y/N)");
+						choice = in.readLine();
+					} while (choice != 'y' || choice != 'n' || choice != 'Y' || choice != 'N');
+			}	
+			
+			if
+				AddCar(esql);
+		}
+		else {
+			if (numResults == 1) {
+				List<List<String>> results = executeQueryAndReturnResult(query);
+				customerID = results.get(0).get(1);
+			}
+			else if (numResults > 1) {
+				String newQuery = "SELECT fname, phone, id FROM Customer WHERE lname = '" + last + "'";
+				List<List<String>> results = executeQueryAndReturnResult(newQuery);
+				System.out.print("Select which customer initiated the service request");
+				System.out.print("Customers with last name \"%s\"", last);
+				for (int i = 0; i < results.size(); i++) {
+					String fname = results.get(i).get(0);
+					String phone = results.get(i).get(1);
+					int currentName = i+1;
+					System.out.print("%s) %s\t%s", currentName, fname, phone);
+				}
+				
+				int choice = in.readLine();
+				customerID = results.get(choice-1).get(2);
+			}
+			
+			//get car info from Car table if customer_id 
+			String listCars = "SELECT vin, make, model FROM Car WHERE car_vin 
+		
+		}
 	}
 	
 	/*This function will allow you to complete an existing service request. Given a service

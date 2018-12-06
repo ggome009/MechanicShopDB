@@ -8,7 +8,7 @@ INSERT INTO Mechanic(fname, lname, experience) VALUES (firstname, lastname, exp)
 INSERT INTO Car(vin, make, model, year) VALUES (carVin, carMake, carModel, carYear);
 
 --Initiate Service request
-INSERT INTO Service_Request(rid, customer_id, car_vin, date, odometer, complain);
+INSERT INTO Service_Request(customer_id, car_vin, date, odometer, complain);
 
 --Close service request
 	--remove service request
