@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -206,6 +207,39 @@ public class MechanicShop{
 		}//end try
 	}//end cleanup
 
+	public String ID(String table) throws SQLException{
+		Random ran = new Random(55);
+	
+		//generate random number
+		int newID = ran.nextInt() & Integer.MAX_VALUE;				
+	
+		//create SQL statement to seach if new id exists in table
+		String query = "SELECT * FROM " + table + " WHERE ";
+
+		if(table == "Owns"){
+			query += "ownership_";
+		} else if (table == "Service_Request") {
+			query += "r";
+		} else if (table == "Closed_Request") {
+			query += "w";
+		}
+
+		String query2 = "id = ";	
+
+		//if new id exists, re-generate random number
+
+		String execute = query + query2 + Integer.toString(newID);	
+		int results = executeQuery(execute);	
+
+		while(results == 1){
+			newID = ran.nextInt() & Integer.MAX_VALUE;	
+			execute = query + query2 + Integer.toString(newID);
+			results = executeQuery(execute);
+		}				
+
+		return Integer.toString(newID);
+	}//end ID
+
 	/**
 	 * The main execution method
 	 * 
@@ -303,31 +337,42 @@ public class MechanicShop{
 		}while (true);
 		return input;
 	}//end readChoice
-	
 
 	public static void AddCustomer(MechanicShop esql){//1
-		String query = "INSERT INTO Customer(fname, lname, phone, address) VALUES (";
-
-		System.out.print("Please enter first name: ");
-		String fname = in.readLine();
+		try{
+			String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES (";
+			System.out.print("=======================================");		
+			System.out.print("ADDING NEW CUSTOMER");
+			System.out.print("=======================================");
 		
+			String id = esql.ID("Customer"); 
 
-		System.out.print("Please enter last name: ");
-		String lname = in.readLine();
+			System.out.print("Please enter first name: ");
+			String fname = in.readLine();		
+
+			System.out.print("Please enter last name: ");
+			String lname = in.readLine();
 		
-		System.out.print("Please enter phone number: ");
-		String ph = in.readLine();
+			System.out.print("Please enter phone number: ");
+			String ph = in.readLine();
 
-		System.out.print("Please enter address: ");
-		String ad = in.readLine();
+			System.out.print("Please enter address: ");
+			String ad = in.readLine();
 
-		query = query + fname + ", " + lname + ", " + ph + ", " + ad + ")";
+			query = query + id + ", " + fname + ", " + lname + ", " + ph + ", " + ad + ")";
 
-		esql.executeUpdate(query);
+			esql.executeUpdate(query);
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	public static void AddMechanic(MechanicShop esql){//2
-		String query = "Mechanic(fname, lname, experience) VALUES (";
+		/*String query = "Mechanic(fname, lname, experience) VALUES (";
+		System.out.print("=======================================");		
+		System.out.print("ADDING NEW MECHANIC");
+		System.out.print("=======================================");		
+
 
 		System.out.print("Please enter first name: ");
 		String fname = in.readLine();
@@ -340,11 +385,15 @@ public class MechanicShop{
 
 		query = query + fname + ", " + lname + ", " + exp + ")";
 
-		esql.executeUpdate(query);
+		esql.executeUpdate(query);*/
 	}
 	
 	public static void AddCar(MechanicShop esql){//3
-		String query = "INSERT INTO Car(vin, make, model, year) VALUES (";
+		/*String query = "INSERT INTO Car(vin, make, model, year) VALUES (";
+		System.out.print("=======================================");		
+		System.out.print("ADDING NEW CAR");
+		System.out.print("=======================================");
+
 
 		System.out.print("Please enter VIN: ");
 		String vin = in.readLine();
@@ -359,7 +408,7 @@ public class MechanicShop{
 		String carYear = in.readLine();
 		
 		query = query + vin + "," + make + "," + model + "," + carYear + ")";
-		esql.executeUpdate(query);
+		esql.executeUpdate(query);*/
 	}
 	
 	/*This function will allow you to add a service request for a customer into the database.
@@ -371,38 +420,52 @@ public class MechanicShop{
 	that client providing the option to initiate the service request for one of the listed cars,
 	otherwise a new car should be added along with the service request information for it.*/
 	public static void InsertServiceRequest(MechanicShop esql){//4
-		
+		/*
 		//search database of existing customers given lname
 		String query = "SELECT lname, id FROM Customer WHERE lname = '";
+		System.out.print("=======================================");		
+		System.out.print("CREATING NEW SERVICE REQUEST");
+		System.out.print("=======================================");
+		
 		System.out.print("Please enter customer last name ");
 		String last = in.readLine();
 		query = query + last + "'";
-		int numResults = executeQuery(String query);
+
+		// store number of results with given last name
+		int numResults = executeQuery(query); 
 		int customerID = 0;
-		if(numResults == 0) {
+
+		
+		if(numResults == 0) { // No customers with given last name
 			System.out.print("Customer not found. Would you like to add a customer? (Y/N)");
 			char choice = in.readLine();
 			
-			if(choice != 'y' || choice != 'n' || choice != 'Y' || choice != 'N') {
+
+			if(choice != 'y' || choice != 'n' || choice != 'Y' || choice != 'N') { // if input isn't y or n, keep looping until it is
 					do {
 						System.out.print("Error: Unrecognized input. Enter (Y/N)");
 						choice = in.readLine();
 					} while (choice != 'y' || choice != 'n' || choice != 'Y' || choice != 'N');
 			}	
 			
-			if
+			if(choice == 'y' || choice == 'Y') { // if y, add car
 				AddCar(esql);
-		}
-		else {
-			if (numResults == 1) {
+			} else if (choice == 'n' || choice == 'N') {
+				System.out.print("Service request cancelled.");
+			}
+
+		} else { 
+
+			if (numResults == 1) { // If only one customer, save their customer ID
 				List<List<String>> results = executeQueryAndReturnResult(query);
 				customerID = results.get(0).get(1);
-			}
-			else if (numResults > 1) {
+			} else if (numResults > 1) { // If multiple customers
 				String newQuery = "SELECT fname, phone, id FROM Customer WHERE lname = '" + last + "'";
 				List<List<String>> results = executeQueryAndReturnResult(newQuery);
+				
 				System.out.print("Select which customer initiated the service request");
 				System.out.print("Customers with last name \"%s\"", last);
+				
 				for (int i = 0; i < results.size(); i++) {
 					String fname = results.get(i).get(0);
 					String phone = results.get(i).get(1);
@@ -417,7 +480,7 @@ public class MechanicShop{
 			//get car info from Car table if customer_id 
 			String listCars = "SELECT vin, make, model FROM Car WHERE car_vin 
 		
-		}
+		}*/
 	}
 	
 	/*This function will allow you to complete an existing service request. Given a service
@@ -430,7 +493,7 @@ public class MechanicShop{
 	}
 	
 	/*.List the customers that have paid less than 100 dollars for repairs based on their
-	previous service requests.*//
+	previous service requests.*/
 	public static void ListCustomersWithBillLessThan100(MechanicShop esql){//6
 		
 	}
