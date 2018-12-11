@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -338,35 +339,62 @@ public class MechanicShop{
 		return input;
 	}//end readChoice
 
+	/*
+		Add a new customer into the database. You should provide an interface that takes as
+		input the information of a new customer (i.e. first, last name, phone, address) and checks
+		if the provided information are valid based on the constraints of the database schema.
+	*/		
 	public static void AddCustomer(MechanicShop esql){//1
 		try{
-			String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES (";
-			System.out.print("=======================================");		
-			System.out.print("ADDING NEW CUSTOMER");
-			System.out.print("=======================================");
-		
+			String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES ('";
+			System.out.print("=======================================\n");		
+			System.out.print("   (1) ADDING NEW CUSTOMER\n");
+			System.out.print("=======================================\n");
+
 			String id = esql.ID("Customer"); 
+			String fname;
+			String lname;		
+			String ph;	
 
-			System.out.print("Please enter first name: ");
-			String fname = in.readLine();		
+			do {
+				System.out.print("Please enter first name: ");
+				fname = in.readLine();		
+			} while(!validateName(fname));
 
-			System.out.print("Please enter last name: ");
-			String lname = in.readLine();
-		
-			System.out.print("Please enter phone number: ");
-			String ph = in.readLine();
+			do {
+				System.out.print("Please enter last name: ");
+				lname = in.readLine();
+			} while(!validateName(lname));
+
+
+			do {
+				System.out.print("Please enter phone number [ex: (###)###-####]: ");
+				ph = in.readLine();
+			} while(!validatePhone());
 
 			System.out.print("Please enter address: ");
 			String ad = in.readLine();
 
-			query = query + id + ", " + fname + ", " + lname + ", " + ph + ", " + ad + ")";
+			query = query + id + "', '" + fname + "', '" + lname + "', '" + ph + "', '" + ad + "')";
+
+			System.out.print("---------\n");
+			System.out.print("Creating Customer #"+ id +"\nName: "+ fname + " "+ lname + "\nPhone: " + ph + "\nAddress: "+ ad + "\n");
 
 			esql.executeUpdate(query);
+			System.out.print("---------\n");
+			System.out.print("SUCCESS\n");
+			System.out.print("=======================================\n");
 		} catch(Exception e){
 			System.out.println(e.getMessage());
 		}
 	}
 	
+	/*
+		Add a new mechanic into the database. You should provide an interface that takes as
+		input the information of a new mechanic (i.e. first, last name, specialty, experience) and
+		checks if the provided information is valid based on the constraints of the database
+		schema.
+	*/
 	public static void AddMechanic(MechanicShop esql){//2
 		/*String query = "Mechanic(fname, lname, experience) VALUES (";
 		System.out.print("=======================================");		
@@ -388,6 +416,12 @@ public class MechanicShop{
 		esql.executeUpdate(query);*/
 	}
 	
+	/*
+		This function should allow for adding a new car into the database. You should
+		provide an interface that takes as input the information of a new car (i.e. vin, make,
+		model, year) checking if the provided information are valid based on the constrains of the
+		database schema.
+	*/
 	public static void AddCar(MechanicShop esql){//3
 		/*String query = "INSERT INTO Car(vin, make, model, year) VALUES (";
 		System.out.print("=======================================");		
