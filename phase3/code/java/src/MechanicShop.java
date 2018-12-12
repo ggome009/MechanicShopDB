@@ -345,7 +345,7 @@ public class MechanicShop{
 		if the provided information are valid based on the constraints of the database schema.
 	*/		
 	public static void AddCustomer(MechanicShop esql){//1
-		try{
+/*		try{
 			String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES ('";
 			System.out.print("=======================================\n");		
 			System.out.print("   (1) ADDING NEW CUSTOMER\n");
@@ -387,7 +387,7 @@ public class MechanicShop{
 		} catch(Exception e){
 			System.out.println(e.getMessage());
 		}
-	}
+*/	}
 	
 	/*
 		Add a new mechanic into the database. You should provide an interface that takes as
@@ -448,73 +448,125 @@ public class MechanicShop{
 	/*This function will allow you to add a service request for a customer into the database.
 	Given a last name, the function should search the database of existing customers. 
 	* If many customers match, a menu option should appear listing all customers with the given last
-	name asking the user to choose which customer has initiated the service request.
-	Otherwise, the client application should provide the option of adding a new customer. 
+	name asking the user to choose which customer has initiated the service request. (DONE)
+	Otherwise, the client application should provide the option of adding a new customer. (DONE)
 	* If an existing customer is chosen, the client application should list all cars associated with
 	that client providing the option to initiate the service request for one of the listed cars,
 	otherwise a new car should be added along with the service request information for it.*/
 	public static void InsertServiceRequest(MechanicShop esql){//4
-		/*
-		//search database of existing customers given lname
-		String query = "SELECT lname, id FROM Customer WHERE lname = '";
-		System.out.print("=======================================");		
-		System.out.print("CREATING NEW SERVICE REQUEST");
-		System.out.print("=======================================");
-		
-		System.out.print("Please enter customer last name ");
-		String last = in.readLine();
-		query = query + last + "'";
+		try {	
+			//search database of existing customers given lname
+			System.out.print("=======================================");		
+			System.out.print("CREATING NEW SERVICE REQUEST");
+			System.out.print("=======================================");
 
-		// store number of results with given last name
-		int numResults = executeQuery(query); 
-		int customerID = 0;
+			String query = "SELECT lname, id FROM Customer WHERE lname = '";
+			System.out.print("Please enter customer last name ");
+			String last = in.readLine();
+			query = query + last + "'";
 
-		
-		if(numResults == 0) { // No customers with given last name
-			System.out.print("Customer not found. Would you like to add a customer? (Y/N)");
-			char choice = in.readLine();
+			// store number of results with given last name
+			int numResults = esql.executeQuery(query); 
+			int customerID = 0;
+
+			// No customers with given last name
+			if(numResults == 0) { 
+				System.out.print("Customer not found. Would you like to add a customer? (Y/N)");
+				String choice = in.readLine();
 			
-
-			if(choice != 'y' || choice != 'n' || choice != 'Y' || choice != 'N') { // if input isn't y or n, keep looping until it is
-					do {
-						System.out.print("Error: Unrecognized input. Enter (Y/N)");
-						choice = in.readLine();
-					} while (choice != 'y' || choice != 'n' || choice != 'Y' || choice != 'N');
-			}	
-			
-			if(choice == 'y' || choice == 'Y') { // if y, add car
-				AddCar(esql);
-			} else if (choice == 'n' || choice == 'N') {
-				System.out.print("Service request cancelled.");
-			}
-
-		} else { 
-
-			if (numResults == 1) { // If only one customer, save their customer ID
-				List<List<String>> results = executeQueryAndReturnResult(query);
-				customerID = results.get(0).get(1);
-			} else if (numResults > 1) { // If multiple customers
+				// if input isn't y or n, keep looping until it is
+				if(choice != "y" || choice != "n" || choice != "Y" || choice != "N") { 
+						do {
+							System.out.print("Error: Unrecognized input. Enter (Y/N)");
+							choice = in.readLine();
+						} while (choice != "y" || choice != "n" || choice != "Y" || choice != "N");
+				}	
+				// if y, add car
+				if(choice == "y" || choice == "Y") { 
+					AddCustomer(esql);
+				} else if (choice == "n" || choice == "N") {
+					System.out.print("Service request cancelled.");
+				}
+			//found customer(s) with given last name
+			} else { 
 				String newQuery = "SELECT fname, phone, id FROM Customer WHERE lname = '" + last + "'";
-				List<List<String>> results = executeQueryAndReturnResult(newQuery);
-				
+				List<List<String>> results = esql.executeQueryAndReturnResult(newQuery);
+
 				System.out.print("Select which customer initiated the service request");
-				System.out.print("Customers with last name \"%s\"", last);
-				
+				System.out.print("Customers with last name \"" + last + "\"");
 				for (int i = 0; i < results.size(); i++) {
 					String fname = results.get(i).get(0);
 					String phone = results.get(i).get(1);
 					int currentName = i+1;
-					System.out.print("%s) %s\t%s", currentName, fname, phone);
+					System.out.print(currentName + ") " + fname + "\t" + phone);
 				}
-				
-				int choice = in.readLine();
-				customerID = results.get(choice-1).get(2);
-			}
+				int choice = Integer.parseInt(in.readLine());
+				customerID = Integer.parseInt(results.get(choice-1).get(2));
 			
-			//get car info from Car table if customer_id 
-			String listCars = "SELECT vin, make, model FROM Car WHERE car_vin 
-		
-		}*/
+				// list customer's cars
+				String listCars = "SELECT * FROM Car C WHERE C.vin IN (SELECT car_vin FROM Owns	WHERE customer_id = '"; 
+				listCars = listCars + customerID + "'";
+			
+				List<List<String>> customerCars = esql.executeQueryAndReturnResult(listCars);
+				System.out.print("Select which car to initiate service request for or add a new car");
+
+				for (int i = 0; i < customerCars.size(); i++) {
+					String carVin = customerCars.get(i).get(0);
+					String carMake = customerCars.get(i).get(1);
+					String carModel = customerCars.get(i).get(2);
+					String carYear = customerCars.get(i).get(3);
+					int currentCar = i+1;
+					System.out.print(currentCar + ") " + carVin + "\t" + carMake + "\t" + carModel + "\t" + carYear);
+				}
+				int carChoice = Integer.parseInt(in.readLine());
+				String srVin = "0";
+				//add new car if user selects last option				
+				if (carChoice == customerCars.size() + 1) {
+			
+					//new car tuple in CAR and OWNS
+					srVin = "1";
+				}
+
+				else { //get selected car
+					srVin = customerCars.get(carChoice).get(0);	
+				}
+			
+				//initiate service request
+				String srID = esql.ID("Service_Request"); //make new RID
+				//customerID found earlier
+				// srVin set earlier
+			
+				String srOdometer;
+				String srComplain;
+	
+
+				Boolean isValidOdometer = false;
+				do {
+					System.out.print("Please enter odometer reading: ");
+					srOdometer = in.readLine();	
+					char[] odometerNum = srOdometer.toCharArray();
+					int length = odometerNum.length;
+					for (char c : odometerNum) {
+						if(!Character.isDigit(c)) {
+							isValidOdometer = false;
+							System.out.print("ERROR: Odometer value must be composed of numerical characters (0-9)");
+						}
+						else if (c == length-1) {
+							isValidOdometer = true;
+						}
+					}
+				} while(!isValidOdometer);
+
+				System.out.print("Please enter a complaint: ");
+				srComplain = in.readLine();
+
+				String srQuery = "INSERT INTO Service_request(rid, customer_id, car_vin, date, odometer, complain) VALUES ('";
+				srQuery = srQuery + srID + "', '" + customerID + "', '" + srVin + "', '" + "CURRENT_DATE"   + "', '" + srOdometer + "', '" + srComplain + "')";
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());			
+		}
+
 	}
 	
 	/*This function will allow you to complete an existing service request. Given a service
