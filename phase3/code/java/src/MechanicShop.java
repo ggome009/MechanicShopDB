@@ -648,12 +648,12 @@ public class MechanicShop{
 	public static void InsertServiceRequest(MechanicShop esql){//4
 		try {	
 			//search database of existing customers given lname
-			System.out.print("=======================================");		
-			System.out.print("CREATING NEW SERVICE REQUEST");
-			System.out.print("=======================================");
+			System.out.println("=======================================");		
+			System.out.println("CREATING NEW SERVICE REQUEST");
+			System.out.println("=======================================");
 
 			String query = "SELECT lname, id FROM Customer WHERE lname = '";
-			System.out.print("Please enter customer last name ");
+			System.out.println("Please enter customer last name ");
 			String last = in.readLine();
 			query = query + last + "'";
 
@@ -663,13 +663,13 @@ public class MechanicShop{
 
 			// No customers with given last name
 			if(numResults == 0) { 
-				System.out.print("Customer not found. Would you like to add a customer? (Y/N)");
+				System.out.println("Customer not found. Would you like to add a customer? (Y/N)");
 				String choice = in.readLine();
 			
 				// if input isn't y or n, keep looping until it is
 				if(choice != "y" || choice != "n" || choice != "Y" || choice != "N") { 
 						do {
-							System.out.print("Error: Unrecognized input. Enter (Y/N)");
+							System.out.println("Error: Unrecognized input. Enter (Y/N)");
 							choice = in.readLine();
 						} while (choice != "y" || choice != "n" || choice != "Y" || choice != "N");
 				}	
@@ -677,20 +677,20 @@ public class MechanicShop{
 				if(choice == "y" || choice == "Y") { 
 					AddCustomer(esql);
 				} else if (choice == "n" || choice == "N") {
-					System.out.print("Service request cancelled.");
+					System.out.println("Service request cancelled.");
 				}
 			//found customer(s) with given last name
 			} else { 
 				String newQuery = "SELECT fname, phone, id FROM Customer WHERE lname = '" + last + "'";
 				List<List<String>> results = esql.executeQueryAndReturnResult(newQuery);
 
-				System.out.print("Select which customer initiated the service request");
-				System.out.print("Customers with last name \"" + last + "\"");
+				System.out.println("Select which customer initiated the service request");
+				System.out.println("Customers with last name \"" + last + "\"");
 				for (int i = 0; i < results.size(); i++) {
 					String fname = results.get(i).get(0);
 					String phone = results.get(i).get(1);
 					int currentName = i+1;
-					System.out.print(currentName + ") " + fname + "\t" + phone);
+					System.out.println(currentName + ") " + fname + "\t" + phone);
 				}
 				int choice = Integer.parseInt(in.readLine());
 				customerID = Integer.parseInt(results.get(choice-1).get(2));
@@ -700,7 +700,7 @@ public class MechanicShop{
 				listCars = listCars + customerID + "'";
 			
 				List<List<String>> customerCars = esql.executeQueryAndReturnResult(listCars);
-				System.out.print("Select which car to initiate service request for or add a new car");
+				System.out.println("Select which car to initiate service request for or add a new car");
 
 				for (int i = 0; i < customerCars.size(); i++) {
 					String carVin = customerCars.get(i).get(0);
@@ -708,7 +708,7 @@ public class MechanicShop{
 					String carModel = customerCars.get(i).get(2);
 					String carYear = customerCars.get(i).get(3);
 					int currentCar = i+1;
-					System.out.print(currentCar + ") " + carVin + "\t" + carMake + "\t" + carModel + "\t" + carYear);
+					System.out.println(currentCar + ") " + carVin + "\t" + carMake + "\t" + carModel + "\t" + carYear);
 				}
 				int carChoice = Integer.parseInt(in.readLine());
 				String srVin = "0";
@@ -734,14 +734,14 @@ public class MechanicShop{
 
 				Boolean isValidOdometer = false;
 				do {
-					System.out.print("Please enter odometer reading: ");
+					System.out.println("Please enter odometer reading: ");
 					srOdometer = in.readLine();	
 					char[] odometerNum = srOdometer.toCharArray();
 					int length = odometerNum.length;
 					for (char c : odometerNum) {
 						if(!Character.isDigit(c)) {
 							isValidOdometer = false;
-							System.out.print("ERROR: Odometer value must be composed of numerical characters (0-9)");
+							System.out.println("ERROR: Odometer value must be composed of numerical characters (0-9)");
 						}
 						else if (c == length-1) {
 							isValidOdometer = true;
@@ -749,7 +749,7 @@ public class MechanicShop{
 					}
 				} while(!isValidOdometer);
 
-				System.out.print("Please enter a complaint: ");
+				System.out.println("Please enter a complaint: ");
 				srComplain = in.readLine();
 
 				String srQuery = "INSERT INTO Service_request(rid, customer_id, car_vin, date, odometer, complain) VALUES ('";
