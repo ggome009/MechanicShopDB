@@ -339,6 +339,146 @@ public class MechanicShop{
 		return input;
 	}//end readChoice
 
+	public static boolean validateName(String name){
+		if(name.length() > 32) {
+			System.out.println("ERROR: name must be 32 characters or less");			
+			return false;
+		}
+	
+		if(name.isEmpty()) {
+			System.out.println("ERROR: name can not be empty");
+			return false;
+		} 
+
+		char[] chars = name.toCharArray();
+		for (char c : chars) {
+			if( (!Character.isLetter(c) && c != '-') &&  (c != '\'' &&  c != ' ') ) {
+				System.out.println("ERROR: name must be composed of only"); 
+				System.out.println(" * alphabetical characters (A-Z,a-z),"); 
+				System.out.println(" * hyphens (-),");
+				System.out.println(" * and/or apostrophes(')");				
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static boolean validatePhone(String phone){
+		if(phone.isEmpty()) {
+			System.out.println("ERROR: phone number must not empty");
+			return false;
+		}
+
+		if(phone.length() > 13 || phone.charAt(0) != '(' || phone.charAt(4) != ')' || phone.charAt(8) != '-') {
+			System.out.println("ERROR: phone number must be of the form (###)###-####");	
+			return false;
+		}		
+
+		char[] chars = phone.toCharArray();
+		int numCount = 0;
+
+		for (char c: chars) {
+			if(Character.isDigit(c)) {
+				numCount++;
+			}
+			
+			if(!Character.isDigit(c) && c != '-' && c != '(' && c != ')') {
+				System.out.println("ERROR: phone number must be of the form (###)###-####");
+				return false;
+			}
+		}
+
+		if(numCount != 10) {
+			System.out.println("ERROR: phone number must be of the form (###)###-####");
+			return false;
+		}
+
+		return true;
+	}
+
+	public static boolean validateAddress(String address, int mode){
+		if(address.isEmpty()) {
+			System.out.println("ERROR: input line must not empty");
+			return false;
+		}		
+
+		if (mode == 1) { // street address
+			char[] chars = address.toCharArray();
+			for (char c : chars) {
+				if( !Character.isDigit(c) && ((!Character.isLetter(c) && c != '.') &&  (c != '-' &&  c != ' ')) ) {
+					System.out.println("ERROR: street address must be composed of only"); 
+					System.out.println(" * alphabetical characters (A-Z,a-z),"); 
+					System.out.println(" * numerical characters (0-9),");
+					System.out.println(" * spaces ( ),");
+					System.out.println(" * hyphens (-),");
+					System.out.println(" * and/or periods (.),");			
+					return false;
+				}
+			}
+		} else if (mode == 2) { // city
+			char[] chars = address.toCharArray();
+			for (char c : chars) {
+				if( (!Character.isDigit(c)) && ((!Character.isLetter(c) && c != '.') &&  (c != '-' &&  c != ' ')) ) {
+					System.out.println("ERROR: City must be composed of only"); 
+					System.out.println(" * alphabetical characters (A-Z,a-z),"); 
+					System.out.println(" * numerical characters (0-9),");
+					System.out.println(" * spaces ( ),");
+					System.out.println(" * hyphens (-),");
+					System.out.println(" * and/or periods (.),");			
+					return false;
+				}
+			}
+		} else if (mode == 3) { // state
+			if (address.length() != 2) {
+				System.out.println("ERROR: State code must be two capital letters (ex: CA, NY)");
+				return false;
+			}
+
+			char[] chars = address.toCharArray();
+			for (char c : chars) {
+				if(!Character.isUpperCase(c)) {		
+					System.out.println("ERROR: State code must be two capital letters (ex: CA, NY)");
+					return false;
+				}
+			}
+		} else if (mode == 4) { // zip
+			if (address.length() != 5) {
+				System.out.println("ERROR: Zip code must be 5 digits long");
+				return false;
+			}
+
+			char[] chars = address.toCharArray();
+			for (char c : chars) {
+				if(!Character.isDigit(c)) {		
+					System.out.println("ERROR: Zip code must be only composed of digits");
+					return false;
+				}
+			}
+		}	
+
+		return true;
+	}
+
+	public static boolean validateYears(String years){
+		char[] chars = years.toCharArray();
+		for (char c : chars) {
+			if(!Character.isDigit(c)) {		
+				System.out.println("ERROR: years of experience must be a number from 0 to 99 inclusive");
+				return false;
+			}
+		}		
+
+		int experience = Integer.parseInt(years);
+
+		if(experience < 0 || experience >= 100) {
+			System.out.println("ERROR: years of experience must be a number from 0 to 99 inclusive");		
+			return false;
+		}
+
+		return true;
+	}
+
 	/*
 		Add a new customer into the database. You should provide an interface that takes as
 		input the information of a new customer (i.e. first, last name, phone, address) and checks
@@ -355,6 +495,8 @@ public class MechanicShop{
 			String fname;
 			String lname;		
 			String ph;	
+			String ad;
+			String temp;
 
 			do {
 				System.out.print("Please enter first name: ");
@@ -370,14 +512,40 @@ public class MechanicShop{
 			do {
 				System.out.print("Please enter phone number [ex: (###)###-####]: ");
 				ph = in.readLine();
-			} while(!validatePhone());
+			} while(!validatePhone(ph));
+
+			System.out.print("Please enter address:\n");
 
 			do {
-				System.out.print("Please enter address: ");
-				String ad = in.readLine();
-			} while(!validateAddress());			
+				System.out.print(" - Street Address: ");
+				temp = in.readLine();
+			} while(!validateAddress(temp, 1));	
+			
+			ad = temp;
+			
+			do {
+				System.out.print(" - City: ");
+				temp = in.readLine();
+			} while(!validateAddress(temp, 2));
 
+			ad = ad + ", " + temp;
+
+			do {
+				System.out.print(" - State code [ex: CA, NY, AZ]: ");
+				temp = in.readLine();
+			} while(!validateAddress(temp, 3));			
+
+			ad = ad + " " + temp;
+
+			do {
+				System.out.print(" - Zip code: ");
+				temp = in.readLine();
+			} while(!validateAddress(temp, 4));
+			
+			ad = ad + " " + temp;
+			
 			query = query + id + "', '" + fname + "', '" + lname + "', '" + ph + "', '" + ad + "')";
+			System.out.println(query);			
 
 			System.out.print("---------\n");
 			System.out.print("Creating Customer #"+ id +"\nName: "+ fname + " "+ lname + "\nPhone: " + ph + "\nAddress: "+ ad + "\n");
@@ -398,24 +566,46 @@ public class MechanicShop{
 		schema.
 	*/
 	public static void AddMechanic(MechanicShop esql){//2
-		/*String query = "Mechanic(fname, lname, experience) VALUES (";
-		System.out.print("=======================================");		
-		System.out.print("ADDING NEW MECHANIC");
-		System.out.print("=======================================");		
+		try {
+			String query = "INSERT INTO Mechanic(id, fname, lname, experience) VALUES (";
+			System.out.print("=======================================\n");		
+			System.out.print("   (2) ADDING NEW MECHANIC\n");
+			System.out.print("=======================================\n");	
 
+			String id = esql.ID("Mechanic");
+			String fname;
+			String lname;
+			String exp;
 
-		System.out.print("Please enter first name: ");
-		String fname = in.readLine();
+			do {
+				System.out.print("Please enter first name: ");
+				fname = in.readLine();		
+			} while(!validateName(fname));
 
-		System.out.print("Please enter last name: ");
-		String lname = in.readLine();
+			do {
+				System.out.print("Please enter last name: ");
+				lname = in.readLine();
+			} while(!validateName(lname));
 		
-		System.out.print("Please enter years of experience: ");
-		String exp = in.readLine();
+			do {
+				System.out.print("Please enter years of experience: ");
+				exp = in.readLine();
+			} while(!validateYears(exp));
 
-		query = query + fname + ", " + lname + ", " + exp + ")";
+			query = query + "'" + id +  "', '" + fname + "', '"+ lname + "', '" + exp + "')";
+			System.out.print(query + "\n");
 
-		esql.executeUpdate(query);*/
+
+			System.out.print("---------\n");
+			System.out.print("Creating Mechanic #"+ id +"\nName: "+ fname + " "+ lname + "\nExperience: " + exp + " years\n");
+
+			esql.executeUpdate(query);
+			System.out.print("---------\n");
+			System.out.print("SUCCESS\n");
+			System.out.print("=======================================\n");
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	/*
@@ -427,7 +617,7 @@ public class MechanicShop{
 	public static void AddCar(MechanicShop esql){//3
 		/*String query = "INSERT INTO Car(vin, make, model, year) VALUES (";
 		System.out.print("=======================================");		
-		System.out.print("ADDING NEW CAR");
+		System.out.print("   (3) ADDING NEW CAR\n");
 		System.out.print("=======================================");
 
 
