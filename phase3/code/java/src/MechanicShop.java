@@ -485,11 +485,11 @@ public class MechanicShop{
 		if the provided information are valid based on the constraints of the database schema.
 	*/		
 	public static void AddCustomer(MechanicShop esql){//1
-/*		try{
+		try{
 			String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES ('";
-			System.out.print("=======================================\n");		
-			System.out.print("   (1) ADDING NEW CUSTOMER\n");
-			System.out.print("=======================================\n");
+			System.out.print("===================================================\n");
+			System.out.print(" (1) ADDING NEW CUSTOMER\n");
+			System.out.print("===================================================\n");;
 
 			String id = esql.ID("Customer"); 
 			String fname;
@@ -553,11 +553,11 @@ public class MechanicShop{
 			esql.executeUpdate(query);
 			System.out.print("---------\n");
 			System.out.print("SUCCESS\n");
-			System.out.print("=======================================\n");
+			System.out.print("===================================================\n");
 		} catch(Exception e){
 			System.out.println(e.getMessage());
 		}
-*/	}
+	}
 	
 	/*
 		Add a new mechanic into the database. You should provide an interface that takes as
@@ -568,9 +568,9 @@ public class MechanicShop{
 	public static void AddMechanic(MechanicShop esql){//2
 		try {
 			String query = "INSERT INTO Mechanic(id, fname, lname, experience) VALUES (";
-			System.out.print("=======================================\n");		
-			System.out.print("   (2) ADDING NEW MECHANIC\n");
-			System.out.print("=======================================\n");	
+			System.out.print("===================================================\n");
+			System.out.print(" (2) ADDING NEW MECHANIC\n");
+			System.out.print("===================================================\n");	
 
 			String id = esql.ID("Mechanic");
 			String fname;
@@ -602,7 +602,7 @@ public class MechanicShop{
 			esql.executeUpdate(query);
 			System.out.print("---------\n");
 			System.out.print("SUCCESS\n");
-			System.out.print("=======================================\n");
+			System.out.print("===================================================\n");
 		} catch(Exception e){
 			System.out.println(e.getMessage());
 		}
@@ -616,9 +616,9 @@ public class MechanicShop{
 	*/
 	public static void AddCar(MechanicShop esql){//3
 		/*String query = "INSERT INTO Car(vin, make, model, year) VALUES (";
-		System.out.print("=======================================");		
-		System.out.print("   (3) ADDING NEW CAR\n");
-		System.out.print("=======================================");
+		System.out.print("===================================================\n");		
+		System.out.print(" (3) ADDING NEW CAR\n");
+		System.out.print("===================================================\n");
 
 
 		System.out.print("Please enter VIN: ");
@@ -648,9 +648,9 @@ public class MechanicShop{
 	public static void InsertServiceRequest(MechanicShop esql){//4
 		try {	
 			//search database of existing customers given lname
-			System.out.println("=======================================");		
-			System.out.println("CREATING NEW SERVICE REQUEST");
-			System.out.println("=======================================");
+			System.out.print("===================================================\n");
+			System.out.print(" (4) CREATING NEW SERVICE REQUEST\n");
+			System.out.print("===================================================\n");
 
 			String query = "SELECT lname, id FROM Customer WHERE lname = '";
 			System.out.println("Please enter customer last name ");
@@ -778,8 +778,11 @@ public class MechanicShop{
 	public static void ListCustomersWithBillLessThan100(MechanicShop esql){//6
 		try {		
 			String query = "SELECT date,bill,comment FROM Closed_Request WHERE bill < 100";
-
+			System.out.print("===================================================\n");
+			System.out.print(" (6) LISTING CUSTOMERS WITH BILL < 100\n");
+			System.out.print("===================================================\n");
 			esql.executeQueryAndPrintResult(query);
+			System.out.print("===================================================\n");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());		
 		}
@@ -794,8 +797,12 @@ public class MechanicShop{
 	public static void ListCustomersWithMoreThan20Cars(MechanicShop esql){//7
 		try {		
 			String query = "SELECT fname, lname, O.car_num FROM Customer,( SELECT customer_id,COUNT(customer_id) as car_num FROM Owns GROUP BY customer_id HAVING COUNT(customer_id) > 20) AS O WHERE O.customer_id = id;";
-
+			
+			System.out.print("===================================================\n");
+			System.out.print(" (7) LISTING CUSTOMERS WITH CARS > 20\n");
+			System.out.print("===================================================\n");
 			esql.executeQueryAndPrintResult(query);
+			System.out.print("===================================================\n");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());		
 		}
@@ -806,8 +813,13 @@ public class MechanicShop{
 	public static void ListCarsBefore1995With50000Milles(MechanicShop esql){//8
 		try {		
 			String query = "SELECT DISTINCT make,model, year FROM Car AS C, Service_Request AS S WHERE year < 1995 and S.car_vin = C.vin and S.odometer < 50000";
-
+			
+			System.out.print("===================================================\n");	
+			System.out.print(" (8) LISTING CARS BEFORE 1995 WITH < 50,000 MILES\n");
+			System.out.print("===================================================\n");
+						
 			esql.executeQueryAndPrintResult(query);
+			System.out.print("===================================================\n");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());		
 		}
@@ -823,6 +835,10 @@ public class MechanicShop{
 	public static void ListKCarsWithTheMostServices(MechanicShop esql){//9
 		try {		
 			String query = "SELECT make, model, R.creq FROM Car AS C, ( SELECT car_vin, COUNT(rid) AS creq FROM Service_Request GROUP BY car_vin ) AS R WHERE R.car_vin = C.vin ORDER BY R.creq DESC LIMIT ";
+
+			System.out.print("===================================================\n");	
+			System.out.print(" (9) LISTING CARS WITH MOST SERVICE REQUESTS\n");
+			System.out.print("===================================================\n");
 			
 			String kstring;		
 			int k;	
@@ -835,6 +851,8 @@ public class MechanicShop{
 			
 			query = query + kstring;
 			esql.executeQueryAndPrintResult(query);
+
+			System.out.print("===================================================\n");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());		
 		}
@@ -849,7 +867,12 @@ public class MechanicShop{
 		try {		
 			String query = "SELECT C.fname , C.lname, Total FROM Customer AS C, (SELECT sr.customer_id, SUM(CR.bill) AS Total FROM Closed_Request AS CR, Service_Request AS SR WHERE CR.rid = SR.rid GROUP BY SR.customer_id) AS A WHERE C.id=A.customer_id ORDER BY A.Total DESC";
 
+			System.out.print("===================================================\n");	
+			System.out.print(" (10) LISTING CARS WITH MOST SERVICE REQUESTS\n");
+			System.out.print("===================================================\n");
+
 			esql.executeQueryAndPrintResult(query);
+			System.out.print("===================================================\n");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());		
 		}
