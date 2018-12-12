@@ -697,8 +697,8 @@ public class MechanicShop{
 			
 				// list customer's cars
 				String listCars = "SELECT * FROM Car C WHERE C.vin IN (SELECT car_vin FROM Owns	WHERE customer_id = '"; 
-				listCars = listCars + customerID + "'";
-			
+				listCars = listCars + Integer.toString(customerID) + "')";
+				
 				List<List<String>> customerCars = esql.executeQueryAndReturnResult(listCars);
 				System.out.println("Select which car to initiate service request for or add a new car");
 
@@ -772,36 +772,87 @@ public class MechanicShop{
 	
 	/*.List the customers that have paid less than 100 dollars for repairs based on their
 	previous service requests.*/
+
+	// TO DO: input validation, beautification
+
 	public static void ListCustomersWithBillLessThan100(MechanicShop esql){//6
+		try {		
+			String query = "SELECT date,bill,comment FROM Closed_Request WHERE bill < 100";
+
+			esql.executeQueryAndPrintResult(query);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());		
+		}
 		
 	}
 	
 	/*Find how many cars each customer has counting from the ownership relation and
 	discover who has more than 20 cars.*/
+
+	// TO DO: input validation, beautification
+
 	public static void ListCustomersWithMoreThan20Cars(MechanicShop esql){//7
-		
+		try {		
+			String query = "SELECT fname, lname, O.car_num FROM Customer,( SELECT customer_id,COUNT(customer_id) as car_num FROM Owns GROUP BY customer_id HAVING COUNT(customer_id) > 20) AS O WHERE O.customer_id = id;";
+
+			esql.executeQueryAndPrintResult(query);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());		
+		}
 	}
 	
 	/*Get the odometer from the service_requests and find all cars before 1995 having less
 	than 50000 miles in the odometer*/
 	public static void ListCarsBefore1995With50000Milles(MechanicShop esql){//8
-		
+		try {		
+			String query = "SELECT DISTINCT make,model, year FROM Car AS C, Service_Request AS S WHERE year < 1995 and S.car_vin = C.vin and S.odometer < 50000";
+
+			esql.executeQueryAndPrintResult(query);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());		
+		}
 	}
 	
 	/*Find for all cars in the database the number of service requests. Return the make,
 	model and number of service requests for the cars having the k highest number of
 	service requests. The k value should be positive and larger than 0. The user should
 	provide this value. Focus on the open service requests.*/
+
+	// TO DO: input validation, beautification
+
 	public static void ListKCarsWithTheMostServices(MechanicShop esql){//9
-		//
-		
+		try {		
+			String query = "SELECT make, model, R.creq FROM Car AS C, ( SELECT car_vin, COUNT(rid) AS creq FROM Service_Request GROUP BY car_vin ) AS R WHERE R.car_vin = C.vin ORDER BY R.creq DESC LIMIT ";
+			
+			String kstring;		
+			int k;	
+			
+			do {
+				System.out.print("Please enter limit value, k: ");
+				kstring = in.readLine();
+				k = Integer.parseInt(kstring);
+			} while (false);
+			
+			query = query + kstring;
+			esql.executeQueryAndPrintResult(query);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());		
+		}
 	}
 	
 	/*For all service requests find the aggregate cost per customer and order customers
 	according to that cost. List their first, last name and total bill.*/
-	public static void ListCustomersInDescendingOrderOfTheirTotalBill(MechanicShop esql){//9
-		//
-		
+
+	// TO DO: beautification
+
+	public static void ListCustomersInDescendingOrderOfTheirTotalBill(MechanicShop esql){//10
+		try {		
+			String query = "SELECT C.fname , C.lname, Total FROM Customer AS C, (SELECT sr.customer_id, SUM(CR.bill) AS Total FROM Closed_Request AS CR, Service_Request AS SR WHERE CR.rid = SR.rid GROUP BY SR.customer_id) AS A WHERE C.id=A.customer_id ORDER BY A.Total DESC";
+
+			esql.executeQueryAndPrintResult(query);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());		
+		}
 	}
 	
 }
