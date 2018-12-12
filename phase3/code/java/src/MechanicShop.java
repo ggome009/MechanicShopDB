@@ -372,8 +372,10 @@ public class MechanicShop{
 				ph = in.readLine();
 			} while(!validatePhone());
 
-			System.out.print("Please enter address: ");
-			String ad = in.readLine();
+			do {
+				System.out.print("Please enter address: ");
+				String ad = in.readLine();
+			} while(!validateAddress());			
 
 			query = query + id + "', '" + fname + "', '" + lname + "', '" + ph + "', '" + ad + "')";
 
