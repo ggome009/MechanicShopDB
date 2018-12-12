@@ -36,7 +36,7 @@ CREATE TABLE Mechanic
 	id INTEGER NOT NULL,
 	fname CHAR(32) NOT NULL,
 	lname CHAR(32) NOT NULL,
-	experience_YEARS NOT NULL,
+	experience _YEARS NOT NULL,
 	PRIMARY KEY (id) 
 );
 
