@@ -478,6 +478,92 @@ public class MechanicShop{
 
 		return true;
 	}
+	
+	public static boolean validateCar(String input, int mode) {
+		
+		if (mode == 1) { // VIN
+			Boolean alpha = false;
+			Boolean numeric = false;
+			if (input.length() != 16) {
+					System.out.println("ERROR: VIN must be 16 characters long");
+					return false;
+			}
+			char[] chars = input.toCharArray();
+			for (char c : chars) {
+				if (!Character.isLetterOrDigit(c)) {
+					System.out.println("ERROR: VIN must be only composed of digits and letters");
+					return false;
+				}
+				else {
+					if (Character.isLetter(c)) {
+						alpha = true;
+					}
+					if (Character.isDigit(c)) {
+						numeric = true;
+					}
+			
+				}
+			}
+		
+			if (!(alpha && numeric)) {
+				System.out.println("ERROR: VIN must contain both digits and letters");
+				return false;
+			}
+			
+			return true;
+		} else if (mode == 2) { // MAKE
+			if(input.length() > 32) {
+				System.out.println("ERROR: make must be 32 characters or less");			
+				return false;
+			}
+			char[] chars = input.toCharArray();
+			for (char c : chars) {
+				if(!Character.isLetterOrDigit(c) && ((c != '&') &&  (c != '-' &&  c != ' ')) ) {
+					System.out.println("ERROR: make must be composed of only"); 
+					System.out.println(" * alphabetical characters (A-Z,a-z),"); 
+					System.out.println(" * numerical characters (0-9),");
+					System.out.println(" * spaces ( ),");
+					System.out.println(" * hyphens (-),");
+					System.out.println(" * and/or ampersands (&),");			
+					return false;
+				}
+			}
+			return true;
+		} else if (mode == 3) { // MODEL
+			if(input.length() > 32) {
+					System.out.println("ERROR: model must be 32 characters or less");			
+					return false;
+			}
+			char[] chars = input.toCharArray();
+			for (char c : chars) {
+				if(!Character.isLetterOrDigit(c) && (c != '-' &&  c != ' ') ) {
+					System.out.println("ERROR: model must be composed of only"); 
+					System.out.println(" * alphabetical characters (A-Z,a-z),"); 
+					System.out.println(" * numerical characters (0-9),");
+					System.out.println(" * spaces ( ),");
+					System.out.println(" * and/ or hyphens (-),");			
+					return false;
+				}
+			}
+			return true;
+		} else if (mode == 4) { // YEAR
+			if(input.length() != 4) {
+					System.out.println("ERROR: year must be 4 digits");			
+					return false;
+			} else {
+				char[] chars = input.toCharArray();
+				for (char c : chars) {
+					if(!Character.isDigit(c)) {
+						System.out.println("ERROR: year must be composed of only 4 digits"); 		
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+		return true;
+	}
+	
 
 	/*
 		Add a new customer into the database. You should provide an interface that takes as
@@ -615,26 +701,203 @@ public class MechanicShop{
 		database schema.
 	*/
 	public static void AddCar(MechanicShop esql){//3
-		/*String query = "INSERT INTO Car(vin, make, model, year) VALUES (";
-		System.out.print("===================================================\n");		
-		System.out.print(" (3) ADDING NEW CAR\n");
-		System.out.print("===================================================\n");
+		try {
+			String query = "INSERT INTO Car(vin, make, model, year) VALUES ('";
+			System.out.print("===================================================\n");		
+			System.out.print(" (3) ADDING NEW CAR\n");
+			System.out.print("===================================================\n");
+
+			String newVIN;
+			String newMake;
+			String newModel;
+			String newYear;
+			Boolean getVin = true;
+			
+			System.out.println("Does this new car belong to an existing customer?");
+			String input1 = in.readLine();
+			if(!input1.equalsIgnoreCase("y") && !input1.equalsIgnoreCase("n")) { 
+				do {
+					System.out.println("Error: Unrecognized input. Enter (Y/N)");
+					input1 = in.readLine();
+				} while (!input1.equalsIgnoreCase("y") && !input1.equalsIgnoreCase("n"));
+			}
+			if (input1.equalsIgnoreCase("y") {
+				// select customer
+			
+			}
+			else {
+				System.out.println("Do you want to add a new customer?");
+				tring input2 = in.readLine();
+				if(!input2.equalsIgnoreCase("y") && !input2.equalsIgnoreCase("n")) { 
+					do {
+						System.out.println("Error: Unrecognized input. Enter (Y/N)");
+						input2 = in.readLine();
+					} while (!input2.equalsIgnoreCase("y") && !input2.equalsIgnoreCase("n"));
+				}
+				//if y then newCustomerID = addCustomerReturnID
+				//if no, exit function
+			}
+			
+			
+			do {
+				//ask for vin
+				do {
+					System.out.println("Please enter VIN: ");
+					newVIN = in.readLine();		
+				} while(!validateCar(newVIN, 1));
+				
+				newVIN = newVIN.toUpperCase();
+				//run sql query to check if VIN exists in database
+				String checkExistingCar = "SELECT * FROM Car WHERE vin = '" + newVIN + "'";
+				int carExists = esql.executeQuery(checkExistingCar);
+				
+				// CAR ALREADY EXISTS
+				if (carExists == 1) {
+					System.out.println("ERROR: Car \"" + newVIN +"\" already exists in database");
+					// TRY AGAIN?
+					System.out.println("Do you want to try again? (Y/N)");
+					String tryAgain = in.readLine();
+			
+					// CHECK IF Y OR N
+					if(!tryAgain.equalsIgnoreCase("y") && !tryAgain.equalsIgnoreCase("n")) { 
+							do {
+								System.out.println("Error: Unrecognized input. Enter (Y/N)");
+								tryAgain = in.readLine();
+							} while (!tryAgain.equalsIgnoreCase("y") && !tryAgain.equalsIgnoreCase("n"));
+					}
+					if (tryAgain.equalsIgnoreCase("n")) {
+						getVin = false;
+						System.out.println("CANCELLED ADDING CAR");
+						System.out.println("===================================================");
+						return;
+					}
+					else {getVin = true;}
+				} 
+				else { getVin = false;}
+
+			} while (getVin);
+			
+			do {
+				System.out.println("Please enter make of car: ");
+				newMake = in.readLine();		
+			} while(!validateCar(newMake, 2)); 
+				
+			do {
+				System.out.println("Please enter model of car: ");
+				newModel = in.readLine();
+			} while (!validateCar(newModel, 3));
+	
+			do {
+				System.out.println("Please enter car year: ");
+				newYear = in.readLine();
+			} while (!validateCar(newYear, 4));
+
+			if (Integer.parseInt(newYear) < 1970) {
+				System.out.println("ERROR: Car is too old to add to Mechanic Shop Database");
+				System.out.println("CANCELLED ADDING CAR");
+				System.out.println("===================================================");
+				return;
+			}
+
+			System.out.print("---------\n");
+			System.out.print("Adding Car "+ newVIN + "\t" + newMake + "\t"+ newModel + "\t" + newYear + "\n");
+
+			query = query + newVIN + "', '" + newMake + "', '" + newModel + "', '" + newYear + "')";
+
+			esql.executeUpdate(query);
+			//call addToOwns(customerID, carVIN) function 
+			
+			System.out.print("---------\n");
+			System.out.print("SUCCESS\n");
+			System.out.print("===================================================\n");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	
+	// HELPER FUNCTIONS FOR INSERT SERVICE REQUEST
+	public static String AddCarReturnVIN(MechanicShop esql, String customerID){
+		
+	}
+	
+	public static String AddCustomerReturnID(MechanicShop eqsl) {
+		try{
+			String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES ('";
+			System.out.print("===================================================\n");
+			System.out.print(" (1) ADDING NEW CUSTOMER\n");
+			System.out.print("===================================================\n");;
+
+			String id = esql.ID("Customer"); 
+			String fname;
+			String lname;		
+			String ph;	
+			String ad;
+			String temp;
+
+			do {
+				System.out.print("Please enter first name: ");
+				fname = in.readLine();		
+			} while(!validateName(fname));
+
+			do {
+				System.out.print("Please enter last name: ");
+				lname = in.readLine();
+			} while(!validateName(lname));
 
 
-		System.out.print("Please enter VIN: ");
-		String vin = in.readLine();
+			do {
+				System.out.print("Please enter phone number [ex: (###)###-####]: ");
+				ph = in.readLine();
+			} while(!validatePhone(ph));
+
+			System.out.print("Please enter address:\n");
+
+			do {
+				System.out.print(" - Street Address: ");
+				temp = in.readLine();
+			} while(!validateAddress(temp, 1));	
+			
+			ad = temp;
+			
+			do {
+				System.out.print(" - City: ");
+				temp = in.readLine();
+			} while(!validateAddress(temp, 2));
+
+			ad = ad + ", " + temp;
+
+			do {
+				System.out.print(" - State code [ex: CA, NY, AZ]: ");
+				temp = in.readLine();
+			} while(!validateAddress(temp, 3));			
+
+			ad = ad + " " + temp;
+
+			do {
+				System.out.print(" - Zip code: ");
+				temp = in.readLine();
+			} while(!validateAddress(temp, 4));
+			
+			ad = ad + " " + temp;
+			
+			query = query + id + "', '" + fname + "', '" + lname + "', '" + ph + "', '" + ad + "')";
+			System.out.println(query);			
+
+			System.out.print("---------\n");
+			System.out.print("Creating Customer #"+ id +"\nName: "+ fname + " "+ lname + "\nPhone: " + ph + "\nAddress: "+ ad + "\n");
+
+			esql.executeUpdate(query);
+			System.out.print("---------\n");
+			System.out.print("SUCCESS\n");
+			System.out.print("===================================================\n");
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+		}
 		
-		System.out.print("Please enter make of car: ");
-		String make = in.readLine();
 		
-		System.out.print("Please enter model of car: ");
-		String model = in.readLine();
-		
-		System.out.print("Please enter car year: ");
-		String carYear = in.readLine();
-		
-		query = query + vin + "," + make + "," + model + "," + carYear + ")";
-		esql.executeUpdate(query);*/
+		return id;
 	}
 	
 	/*This function will allow you to add a service request for a customer into the database.
@@ -667,16 +930,20 @@ public class MechanicShop{
 				String choice = in.readLine();
 			
 				// if input isn't y or n, keep looping until it is
-				if(choice != "y" || choice != "n" || choice != "Y" || choice != "N") { 
+				if(!choice.equalsIgnoreCase("y") && !choice.equalsIgnoreCase("n")) { 
 						do {
 							System.out.println("Error: Unrecognized input. Enter (Y/N)");
 							choice = in.readLine();
-						} while (choice != "y" || choice != "n" || choice != "Y" || choice != "N");
+						} while (!choice.equalsIgnoreCase("y") && !choice.equalsIgnoreCase("n"));
 				}	
 				// if y, add car
-				if(choice == "y" || choice == "Y") { 
-					AddCustomer(esql);
-				} else if (choice == "n" || choice == "N") {
+				String customerID = "";
+				String carVIN = "";
+				if(choice.equalsIgnoreCase("y")) { 
+					customerID = AddCustomerReturnID(esql); //get customerID add car
+					carVIN = AddCarReturnVIN(esql, customerID);
+					addToOwns(customerID, carVIN);
+				} else {
 					System.out.println("Service request cancelled.");
 				}
 			//found customer(s) with given last name
