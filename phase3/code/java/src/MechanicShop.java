@@ -712,6 +712,8 @@ public class MechanicShop{
 			String newModel;
 			String newYear;
 			Boolean getVin = true;
+			String customerID = "";
+			
 			
 			System.out.println("Does this new car belong to an existing customer?");
 			String input1 = in.readLine();
@@ -721,23 +723,56 @@ public class MechanicShop{
 					input1 = in.readLine();
 				} while (!input1.equalsIgnoreCase("y") && !input1.equalsIgnoreCase("n"));
 			}
-			if (input1.equalsIgnoreCase("y") {
-				// select customer
-			
+			if (input1.equalsIgnoreCase("y")) {
+				System.out.println("Please enter the customer's last name");
+				String lastName = in.readLine();
+				
+				
+				String query2 = "SELECT lname, id FROM Customer WHERE lname = '";
+
+				query2 = query2 + lastName + "'";
+
+				// store number of results with given last name
+				int numResults = esql.executeQuery(query); 
+
+				// No customers with given last name
+				if(numResults == 0) { 
+					System.out.println("No customers with last name " + lastName + " found. Request to add car cancelled. No customer to attach.");
+					return;
+				}	
+				
+				
+				String newQuery = "SELECT fname, phone, id FROM Customer WHERE lname = '" + lastName + "'";
+				List<List<String>> results = esql.executeQueryAndReturnResult(newQuery);
+
+				System.out.println("Select which customer initiated the service request");
+				System.out.println("Customers with last name \"" + lastName + "\"");
+				for (int i = 0; i < results.size(); i++) {
+					String fname = results.get(i).get(0);
+					String phone = results.get(i).get(1);
+					int currentName = i+1;
+					System.out.println(currentName + ") " + fname + "\t" + phone);
+				}
+				int choice = Integer.parseInt(in.readLine());
+				customerID = (results.get(choice-1).get(2));
 			}
 			else {
 				System.out.println("Do you want to add a new customer?");
-				tring input2 = in.readLine();
+				String input2 = in.readLine();
 				if(!input2.equalsIgnoreCase("y") && !input2.equalsIgnoreCase("n")) { 
 					do {
 						System.out.println("Error: Unrecognized input. Enter (Y/N)");
 						input2 = in.readLine();
 					} while (!input2.equalsIgnoreCase("y") && !input2.equalsIgnoreCase("n"));
 				}
-				//if y then newCustomerID = addCustomerReturnID
-				//if no, exit function
-			}
-			
+				if (input2.equalsIgnoreCase("y")) {
+					customerID = addCustomerReturnID(esql);
+				}
+				else {
+					System.out.println("Request to add car cancelled. No customer to attach.");
+					return;
+				}
+			}		
 			
 			do {
 				//ask for vin
@@ -805,7 +840,7 @@ public class MechanicShop{
 			query = query + newVIN + "', '" + newMake + "', '" + newModel + "', '" + newYear + "')";
 
 			esql.executeUpdate(query);
-			//call addToOwns(customerID, carVIN) function 
+			esql.executeUpdate("INSERT INTO OWNS(ownership_id, customer_id, car_vin) VALUES ('" + esql.ID("Owns") + "', " + customerID + "', '" + newVIN + "')");
 			
 			System.out.print("---------\n");
 			System.out.print("SUCCESS\n");
@@ -818,18 +853,103 @@ public class MechanicShop{
 	
 	
 	// HELPER FUNCTIONS FOR INSERT SERVICE REQUEST
-	public static String AddCarReturnVIN(MechanicShop esql, String customerID){
+	public static String addCarReturnVIN(MechanicShop esql, String customerID){
+		String newVIN = "";
+		try {
+			String query = "INSERT INTO Car(vin, make, model, year) VALUES ('";
+			System.out.print("===================================================\n");		
+			System.out.print(" (3) ADDING NEW CAR\n");
+			System.out.print("===================================================\n");
+			String newMake;
+			String newModel;
+			String newYear;
+			Boolean getVin = true;
+			
+			do {
+				//ask for vin
+				do {
+					System.out.println("Please enter VIN: ");
+					newVIN = in.readLine();		
+				} while(!validateCar(newVIN, 1));
+				
+				newVIN = newVIN.toUpperCase();
+				//run sql query to check if VIN exists in database
+				String checkExistingCar = "SELECT * FROM Car WHERE vin = '" + newVIN + "'";
+				int carExists = esql.executeQuery(checkExistingCar);
+				
+				// CAR ALREADY EXISTS
+				if (carExists == 1) {
+					System.out.println("ERROR: Car \"" + newVIN +"\" already exists in database");
+					// TRY AGAIN?
+					System.out.println("Do you want to try again? (Y/N)");
+					String tryAgain = in.readLine();
+			
+					// CHECK IF Y OR N
+					if(!tryAgain.equalsIgnoreCase("y") && !tryAgain.equalsIgnoreCase("n")) { 
+							do {
+								System.out.println("Error: Unrecognized input. Enter (Y/N)");
+								tryAgain = in.readLine();
+							} while (!tryAgain.equalsIgnoreCase("y") && !tryAgain.equalsIgnoreCase("n"));
+					}
+					if (tryAgain.equalsIgnoreCase("n")) {
+						getVin = false;
+						System.out.println("CANCELLED ADDING CAR");
+						System.out.println("===================================================");
+						return "cancelled";
+					}
+					else {getVin = true;}
+				} 
+				else { getVin = false;}
+
+			} while (getVin);
+			
+			do {
+				System.out.println("Please enter make of car: ");
+				newMake = in.readLine();		
+			} while(!validateCar(newMake, 2)); 
+				
+			do {
+				System.out.println("Please enter model of car: ");
+				newModel = in.readLine();
+			} while (!validateCar(newModel, 3));
+	
+			do {
+				System.out.println("Please enter car year: ");
+				newYear = in.readLine();
+			} while (!validateCar(newYear, 4));
+
+			if (Integer.parseInt(newYear) < 1970) {
+				System.out.println("ERROR: Car is too old to add to Mechanic Shop Database");
+				System.out.println("CANCELLED ADDING CAR");
+				System.out.println("===================================================");
+				return "cancelled";
+			}
+
+			System.out.print("---------\n");
+			System.out.print("Adding Car "+ newVIN + "\t" + newMake + "\t"+ newModel + "\t" + newYear + "\n");
+
+			query = query + newVIN + "', '" + newMake + "', '" + newModel + "', '" + newYear + "')";
+
+			esql.executeUpdate(query);
+			esql.executeUpdate("INSERT INTO OWNS(ownership_id, customer_id, car_vin) VALUES ('" + esql.ID("Owns") + "', " + customerID + "', '" + newVIN + "')");
+			return newVIN;
+					
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return newVIN;
 		
 	}
 	
-	public static String AddCustomerReturnID(MechanicShop eqsl) {
+	public static String addCustomerReturnID(MechanicShop esql) {
+		String id = "";
 		try{
 			String query = "INSERT INTO Customer(id, fname, lname, phone, address) VALUES ('";
 			System.out.print("===================================================\n");
 			System.out.print(" (1) ADDING NEW CUSTOMER\n");
 			System.out.print("===================================================\n");;
 
-			String id = esql.ID("Customer"); 
+			id = esql.ID("Customer"); 
 			String fname;
 			String lname;		
 			String ph;	
@@ -887,17 +1007,29 @@ public class MechanicShop{
 
 			System.out.print("---------\n");
 			System.out.print("Creating Customer #"+ id +"\nName: "+ fname + " "+ lname + "\nPhone: " + ph + "\nAddress: "+ ad + "\n");
+			String query = "SELECT lname, id FROM Customer WHERE lname = '";
+			System.out.println("Please enter customer last name ");
+			String last = in.readLine();
+			query = query + last + "'";
 
+			// store number of results with given last name
+			int numResults = esql.executeQuery(query); 
+			String customerID = "";
+			String carVIN = "";
+
+			// No customers with given last name
+			if(numResults == 0) { 
+				System.out.println(
 			esql.executeUpdate(query);
 			System.out.print("---------\n");
 			System.out.print("SUCCESS\n");
 			System.out.print("===================================================\n");
+			return id;
 		} catch(Exception e){
 			System.out.println(e.getMessage());
 		}
-		
-		
 		return id;
+		
 	}
 	
 	/*This function will allow you to add a service request for a customer into the database.
@@ -922,7 +1054,8 @@ public class MechanicShop{
 
 			// store number of results with given last name
 			int numResults = esql.executeQuery(query); 
-			int customerID = 0;
+			String customerID = "";
+			String carVIN = "";
 
 			// No customers with given last name
 			if(numResults == 0) { 
@@ -937,12 +1070,14 @@ public class MechanicShop{
 						} while (!choice.equalsIgnoreCase("y") && !choice.equalsIgnoreCase("n"));
 				}	
 				// if y, add car
-				String customerID = "";
-				String carVIN = "";
 				if(choice.equalsIgnoreCase("y")) { 
-					customerID = AddCustomerReturnID(esql); //get customerID add car
-					carVIN = AddCarReturnVIN(esql, customerID);
-					addToOwns(customerID, carVIN);
+					customerID = addCustomerReturnID(esql); //add customer and get ID
+					
+					carVIN = addCarReturnVIN(esql, customerID); //adds to car and to owns
+					if (carVIN.equals("cancelled")) {
+						System.out.println("Cancelled adding car - Insert service request cancelled");
+						return;
+					}
 				} else {
 					System.out.println("Service request cancelled.");
 				}
@@ -960,11 +1095,11 @@ public class MechanicShop{
 					System.out.println(currentName + ") " + fname + "\t" + phone);
 				}
 				int choice = Integer.parseInt(in.readLine());
-				customerID = Integer.parseInt(results.get(choice-1).get(2));
+				customerID = (results.get(choice-1).get(2));
 			
 				// list customer's cars
 				String listCars = "SELECT * FROM Car C WHERE C.vin IN (SELECT car_vin FROM Owns	WHERE customer_id = '"; 
-				listCars = listCars + Integer.toString(customerID) + "')";
+				listCars = listCars + customerID + "')";
 				
 				List<List<String>> customerCars = esql.executeQueryAndReturnResult(listCars);
 				System.out.println("Select which car to initiate service request for or add a new car");
@@ -983,7 +1118,7 @@ public class MechanicShop{
 				if (carChoice == customerCars.size() + 1) {
 			
 					//new car tuple in CAR and OWNS
-					srVin = "1";
+					srVin = addCarReturnVIN(esql, customerID);
 				}
 
 				else { //get selected car
