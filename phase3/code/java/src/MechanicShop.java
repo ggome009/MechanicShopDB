@@ -25,6 +25,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
+import java.text.DateFormat;  
+import java.text.SimpleDateFormat;  
+import java.util.Date;  
+import java.util.Calendar;  
+import java.text.ParseException;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -340,6 +345,11 @@ public class MechanicShop{
 	}//end readChoice
 
 	public static boolean validateName(String name){
+		if(name.isEmpty()) {
+			System.out.println("ERROR: name must not empty");
+			return false;
+		}		
+
 		if(name.length() > 32) {
 			System.out.println("ERROR: name must be 32 characters or less");			
 			return false;
@@ -461,6 +471,11 @@ public class MechanicShop{
 	}
 
 	public static boolean validateYears(String years){
+		if(years.isEmpty()) {
+			System.out.println("ERROR: years must not empty");
+			return false;
+		}
+
 		char[] chars = years.toCharArray();
 		for (char c : chars) {
 			if(!Character.isDigit(c)) {		
@@ -475,6 +490,73 @@ public class MechanicShop{
 			System.out.println("ERROR: years of experience must be a number from 0 to 99 inclusive");		
 			return false;
 		}
+
+		return true;
+	}
+
+	public static boolean validateServiceRequest(String srnum, MechanicShop esql){
+		if(srnum.isEmpty()) {
+			System.out.println("ERROR: Service Request Number must not be empty");		
+			return false;
+		}	
+
+		char[] chars = srnum.toCharArray();
+		for (char c : chars) {
+			if(!Character.isDigit(c)) {		
+				System.out.println("ERROR: Service Request Number must be only composed of digits");
+				return false;
+			}
+		}	
+
+		try{
+			if(0 == esql.executeQuery("SELECT * FROM Service_Request WHERE rid="+srnum)) {
+				System.out.println("ERROR: Service Request Number " + srnum + " not found");
+				return false;
+			}
+		} catch (Exception e) {
+			
+		}
+		return true;
+	}
+
+	public static boolean validateMechanic(String emnum, MechanicShop esql){
+		if(emnum.isEmpty()) {
+			System.out.println("ERROR: Employee ID Number must not be empty");		
+			return false;
+		}	
+
+		char[] chars = emnum.toCharArray();
+		for (char c : chars) {
+			if(!Character.isDigit(c)) {		
+				System.out.println("ERROR: Employee ID Number must be only composed of digits");
+				return false;
+			}
+		}	
+
+		try{
+			if(0 == esql.executeQuery("SELECT * FROM Mechanic WHERE id="+emnum)) {
+				System.out.println("ERROR: Employee ID Number " + emnum + " not found");
+				return false;
+			}
+		} catch (Exception e) {
+			
+		}
+		return true;
+	}	
+
+	public static boolean validateBill(String bill){
+		if(bill.isEmpty()) {
+			System.out.println("ERROR: total bill must not empty");
+			return false;
+		}		
+
+		char[] chars = bill.toCharArray();
+		for (char c : chars) {
+			if(!Character.isDigit(c)) {		
+				System.out.println("ERROR: bill must be composed of numbers only");
+				return false;
+			}
+		}		
 
 		return true;
 	}
@@ -545,7 +627,6 @@ public class MechanicShop{
 			ad = ad + " " + temp;
 			
 			query = query + id + "', '" + fname + "', '" + lname + "', '" + ph + "', '" + ad + "')";
-			System.out.println(query);			
 
 			System.out.print("---------\n");
 			System.out.print("Creating Customer #"+ id +"\nName: "+ fname + " "+ lname + "\nPhone: " + ph + "\nAddress: "+ ad + "\n");
@@ -767,7 +848,73 @@ public class MechanicShop{
 	for the validity of the provided inputs (i.e. does the mechanic exist, does the request exist,
 	valid closing date after request date, etc.)*/
 	public static void CloseServiceRequest(MechanicShop esql) throws Exception{//5
-		
+		try {
+			System.out.print("===================================================\n");
+			System.out.print(" (5) CLOSING A SERVICE REQUEST\n");
+			System.out.print("===================================================\n");
+
+//YYYY-MM-DD
+			String rid;
+			do {
+				System.out.print("Please enter service request number: ");
+				rid = in.readLine();	
+			} while(!validateServiceRequest(rid, esql));
+
+			String mid;
+			do {
+				System.out.print("Please enter employee id number: ");
+				mid = in.readLine();		
+			} while(!validateMechanic(mid,esql));
+
+			Date d = Calendar.getInstance().getTime();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			String closureDate = dateFormat.format(d);
+
+			String validationQuery = "SELECT date FROM Service_Request WHERE rid='" + rid + "'";
+			List<List<String>> myTuple = esql.executeQueryAndReturnResult(validationQuery);
+			
+			String ServiceRequestDate = myTuple.get(0).get(0);
+			
+			Date ServiceDate = dateFormat.parse(ServiceRequestDate);
+			Date ClosureDate = dateFormat.parse(closureDate);
+
+			if (ServiceDate.compareTo(ClosureDate) > 0) {
+				// System.out.println("ServiceDate is after ClosureDate");
+				System.out.println("ERROR: Current date (" + closureDate + ") is before date of service (" + ServiceRequestDate + ")\nCannot close service request " + rid + " because no service has been done");
+			} else {
+				String wid = esql.ID("Closed_Request");
+				
+				String bill;
+				do {
+					System.out.print("Please enter billing amount: $");
+					bill = in.readLine();
+				} while(!validateBill(bill));
+
+				String comment;
+				
+				System.out.print("Please enter comment(s) about service [press Enter when done]: ");
+				comment = in.readLine();
+				
+
+
+				String closeString = "INSERT INTO Closed_Request(wid,rid,mid,date,comment,bill) VALUES ('";
+				closeString = closeString + wid + "', '" + rid + "', '" + mid + "', '" + closureDate + "', '" + comment + "', '" + bill + "')";
+
+				System.out.print("---------");
+				String receipt = "\nReceipt number: " + wid + "\n\nService request #"+ rid +"\nClosed by Employee #" + mid + "\nDate of Closure: " + closureDate + "\nComments: "+ comment + "\nAmount Paid: $" + bill + "\n";
+				System.out.print(receipt);
+
+				esql.executeUpdate(closeString);
+				System.out.print("---------\n");
+				System.out.print("SUCCESS\n");
+				System.out.print("===================================================\n");
+			}
+
+			
+				
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	/*.List the customers that have paid less than 100 dollars for repairs based on their
