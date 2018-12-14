@@ -148,3 +148,17 @@ COPY Closed_Request (
 )
 FROM 'closed_request.csv'
 WITH DELIMITER ',';
+
+CREATE INDEX customerID
+ON Customer(id);
+
+CREATE INDEX mechanicID
+ON Mechanic(id);
+
+CREATE INDEX carVin
+ON Car(vin);
+
+CREATE INDEX srID
+ON Service_Request(rid);
+
+
